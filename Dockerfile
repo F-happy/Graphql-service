@@ -1,8 +1,8 @@
 FROM node:8.2.1
-MAINTAINER fuhuixiang
+MAINTAINER jonnyf
 
-ADD . /home/sales-system-api
-WORKDIR /home/sales-system-api
+ADD . /home/jonnyf-graphql-api
+WORKDIR /home/jonnyf-graphql-api
 
 ENV NODE_ENV production
 ENV PORT 2333
