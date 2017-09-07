@@ -17,19 +17,19 @@
 
 以上三个问题看起来并不复杂，按照以往的逻辑其实也是很好解决的，就拿第一个来说，遇到多平台需要兼容时其实可以通过提供不同平台的接口来解决，例如这样：
 
-```
+```javaScript
 http://api.xxx.com/web/getUserInfo/:uid
 http://api.xxx.com/app/getUserInfo/:uid
 http://api.xxx.com/mobile/getUserInfo/:uid
 ```
 又或者是通过不同的参数去控制：
-```
+```javaScript
 http://api.xxx.com/getUserInfo/:uid?platfrom=web
 ```
 虽然这是一个方便的解决方案，但带来的其实是后端逻辑的增加，需要为不同平台维护不同的逻辑代码。
 
 再说第二个问题，一个页面需要多次调用接口来聚合数据这块也可以通过多加接口的方式来解决：
-```
+```javaScript
 http://api.xxx.com/getIndexInfo
 ```
 或者是通过 http2 来复用请求，但这些方法不是增加工作量就是有兼容性问题，那么还有没有其他的方法呢？
@@ -45,11 +45,11 @@ http://api.xxx.com/getIndexInfo
 这又是一个什么东西呢？具体的介绍直接看它的官网就好了，我在这里就不多说了，直接来看看如何使用吧。
 
 由于我的中间层是基于 [Koa2](http://koajs.com) 的，所以就在 koa2 上面做演示了，手写我们先安装依赖：
-```
+```javaScript
 npm install graphql koa-graphql --save
 ```
 这样我们就可以在 koa 中使用 graphql 了，然后就是配置路由了，按照文档上面的例子，我们可以这样写：
-```
+```javaScript
 "use strict";
 const router = require('koa-router')();
 const graphqlHTTP = require('koa-graphql');
@@ -73,11 +73,11 @@ router.all('/graphql', graphqlModule);
 接下来去看看从最简单的 hello world 开始，然后完成一个最基础的 demo。
 
 首先我们在客户端发起一个 post 请求，然后在请求 body 中带上我们的查询语句，在 Graphql 中有两种类型的查询，一直是 query 开头的查询操作，一种是 mutation 开头的修改操作。
-```
+```javaScript
 query {hello}
 ```
 这是一个最简单的查询，那么这个查询是如何通过解析的呢？上文说到全部的 Graphql 查询都会通过 schema 来进行解析，那我们看看上面定义的GraphQLSchema对象是个什么吧。
-```
+```javaScript
 module.exports = new GraphQLSchema({
     query: new GraphQLObjectType({
         name: 'rootQueryType',
@@ -105,7 +105,7 @@ module.exports = new GraphQLSchema({
 我们一步步来说，首先在这个文件中导出的是一个 GraphQLSchema 对象，这是 Graphql 的基础对象，里面包含了我们需要的两种类型，然后看 query 属性，它返回的是一个GraphQLObjectType对象，这是 Graphql 中对于 object 的基本类型，这个对象中包含 name:名称（全局唯一），description: 描述（这会自动的显示在文档中，虽然是非必须的，但是我还是强烈建议每个 Graphql 节点都写上，这样在后面的维护和查询中都非常有利），最后就是fields属性了，一个 Graphql 语句能查到什么就全靠这里写了什么了，在开始的例句中我们查询 query{hello}，其实就是说我们要查根节点下的 hello 属性，所以这里我们就需要在 query 的 fields 中写上 hello 属性了，否则这条查询语句就无法生效了。
 
 接下来我们看看这个 hello 属性中又包含了什么呢？首先我们需要指定它的类型，这很关键，这个类型是 hello 的返回类型，在这里我指定它返回的是一个字符串，除此之外还有 Int，Boolean 等 js 的基础类型可供选择，具体可去查看文档，当然了，在复杂情况下也可以返回 GraphQLObjectType 这种对象类型，然后就是对 hello 的描述字段description，接下来是args 属性，如果我们需要给这次查询传入参数的话就靠这个了，接下来就是最关键的 resolve 函数了，这个函数接受三个参数，第一个是上层的返回值，这在循环嵌套的情况下会经常使用，比如说如果 hello 还有子属性的话，那么子属性的这个参数就会是 args.name，第二个参数便是查询属性，第三个是我们一开始说的贯穿整个请求的上下文。下面是一个完整的例子:
-```
+```javaScript
 Request: query{hello(name: "world")}
 
 Response: {"hello": "world"}
