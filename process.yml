@@ -1,0 +1,7 @@
+apps:
+  - script: './bin/start.js'
+    name: 'jonnyf-graphql-api'
+    exec_mode: 'cluster'
+    instances: 'max'
+    combine_logs: true
+    autorestart: true

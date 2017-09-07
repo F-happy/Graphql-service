@@ -1,0 +1,15 @@
+version: '2'
+services:
+  jonnyf-graphql-api:
+    image: jonnyf-graphql-api
+    build: .
+    restart: always
+    container_name: jonnyf-graphql-api
+    environment:
+      - NODE_ENV=develop
+      - BANK_RPC_URL=http://jonnyf-graphql-api.jonnyf.com
+      - BANK_END_URL=http://jonnyf-graphql-api.jonnyf.com
+    volumes:
+      - /app/log/jonnyf-graphql-api:/home/jonnyf-graphql-api/logs
+    ports:
+      - "23334:2333"
